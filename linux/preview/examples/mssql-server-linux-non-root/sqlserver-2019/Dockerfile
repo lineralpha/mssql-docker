@@ -24,7 +24,7 @@
 #   launch sqlcmd:
 #       /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "<YourSA$Password>"
 #   run these two SQL command to validate the SQL Server is running OK:
-#       SELECT @@ServerName @@Version;
+#       SELECT @@ServerName, @@Version;
 #       SELECT FULLTEXTSERVICEPROPERTY('IsFullTextInstalled');
 #
 
@@ -32,18 +32,15 @@
 FROM mcr.microsoft.com/mssql/server:2019-latest
 
 USER root
-
-# Install prerequisites
-RUN export DEBIAN_FRONTEND=noninteractive APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
-RUN apt-get update && \
-    apt-get install -y apt-utils sudo vim gnupg curl apt-transport-https
-
-# Get official Microsoft repository configuration
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-RUN curl https://packages.microsoft.com/config/ubuntu/18.04/mssql-server-2019.list | tee /etc/apt/sources.list.d/mssql-server-2019.list
-
-# Install optional packages
-RUN apt-get update && \
+RUN export DEBIAN_FRONTEND=noninteractive APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn && \
+    # Install prerequisites
+    apt-get update && \
+    apt-get install -y apt-utils sudo vim gnupg curl apt-transport-https && \
+    # Get official Microsoft repository configuration
+    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl https://packages.microsoft.com/config/ubuntu/18.04/mssql-server-2019.list | tee /etc/apt/sources.list.d/mssql-server-2019.list && \
+    # Install optional packages
+    apt-get update && \
     apt-get install -y mssql-server-ha && \
     apt-get install -y mssql-server-fts && \
     # Cleanup the Dockerfile
